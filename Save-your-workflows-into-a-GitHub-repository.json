@@ -1,0 +1,364 @@
+{
+  "name": "Save-your-workflows-into-a-GitHub-repository",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "On clicking 'execute'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [-480, 80],
+      "typeVersion": 1,
+      "id": "e642bc3c-fe2c-41f0-a623-dc4e0f849694"
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = [];\nfor (item of items[0].json.data) {\n  newItems.push({json: item});\n}\nreturn newItems;"
+      },
+      "name": "dataArray",
+      "type": "n8n-nodes-base.function",
+      "position": [-40, 240],
+      "typeVersion": 1,
+      "id": "624a418e-07cb-4adb-8a39-7b05ef792892"
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "http://localhost:5678/api/v1/workflows",
+        "options": {}
+      },
+      "name": "N8N Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [-180, 240],
+      "typeVersion": 1,
+      "id": "7c6116d0-2839-44cc-826b-5c165b9c6643"
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "=http://localhost:5678/api/v1/workflows/{{$json[\"id\"]}}",
+        "options": {}
+      },
+      "name": "N8N Workflow Detail",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [280, 400],
+      "typeVersion": 1,
+      "id": "87324f11-4044-4bc4-a1f2-90fb66aa1f4b"
+    },
+    {
+      "parameters": {},
+      "name": "same",
+      "type": "n8n-nodes-base.noOp",
+      "position": [1400, -260],
+      "typeVersion": 1,
+      "id": "f5f5d7fd-893e-4e18-8f91-7a47f91a3665"
+    },
+    {
+      "parameters": {},
+      "name": "different",
+      "type": "n8n-nodes-base.noOp",
+      "position": [1240, 200],
+      "typeVersion": 1,
+      "id": "2ed3bfed-2e4f-4681-878b-2565dac8df5a"
+    },
+    {
+      "parameters": {},
+      "name": "new",
+      "type": "n8n-nodes-base.noOp",
+      "position": [1340, -20],
+      "typeVersion": 1,
+      "id": "d526445e-3a70-47d7-80c9-b8f70bbfb8cf"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "=sabiulhajjajbevy",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "=n8n-backups",
+          "mode": "name"
+        },
+        "filePath": "={{ $node[\"Code\"].json.name }}.json",
+        "fileContent": "={{ $node['Convert to base64'].json['encoded']}}",
+        "commitMessage": "=[N8N Backup] Edited {{$node[\"Globals\"].json[\"repo\"][\"name\"]}} "
+      },
+      "name": "GitHub Edit",
+      "type": "n8n-nodes-base.github",
+      "position": [1880, 640],
+      "typeVersion": 1,
+      "id": "925dcc1f-55af-42bf-9680-ea77e66efc2f"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "sabiulhajjajbevy",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "=n8n-backups",
+          "mode": "name"
+        },
+        "filePath": "={{ $node[\"Code\"].json.name }}.json",
+        "fileContent": "={{ $node[\"re-encode\"].json.fileContent }}",
+        "commitMessage": "=[N8N Backup] Edited {{$node[\"Globals\"].json[\"repo\"][\"name\"]}} "
+      },
+      "name": "GitHub Create",
+      "type": "n8n-nodes-base.github",
+      "position": [1880, 300],
+      "typeVersion": 1,
+      "id": "09984204-3be6-4073-9569-b8f2c816d133"
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 20
+            }
+          ]
+        }
+      },
+      "name": "Daily @ 20:00",
+      "type": "n8n-nodes-base.cron",
+      "position": [-480, 380],
+      "typeVersion": 1,
+      "id": "c64ede44-4359-4d5d-84e6-38422cdc9a60"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "OneAtATime",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [120, 240],
+      "typeVersion": 1,
+      "id": "19bb1359-69c6-4b36-bc0c-390448fd1e6d"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "repo.owner",
+              "value": "your-github-username"
+            },
+            {
+              "name": "repo.name",
+              "value": "n8n-workflows-backup"
+            },
+            {
+              "name": "repo.path",
+              "value": "workflows/"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Globals",
+      "type": "n8n-nodes-base.set",
+      "position": [-340, 240],
+      "typeVersion": 1,
+      "id": "a699e09b-f89a-4369-83bb-ac65db5febdc"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "sabiulhajjajbevy",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-backups",
+          "mode": "name"
+        },
+        "filePath": "={{ $json.name }}.json",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "name": "Get a file",
+      "type": "n8n-nodes-base.github",
+      "position": [320, 0],
+      "typeVersion": 1,
+      "id": "52aae5f6-487d-49aa-b885-536dc0fe0507",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const fromatedData = {\n  name: $input.all()[0].json.name,\n  nodes: $input.all()[0].json.nodes,\n}\n\nreturn fromatedData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 700],
+      "id": "65144682-e590-4f47-bf6d-d5ec96ab41bc",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input1 = $input.all()[0].json; \nconst input2 =$input.all()[1].json;\n\nlet same = false;\nlet different = false;\nlet newFile = false;\n\nif(input1?.name === input2?.name  && input1?.nodes === input2?.nodes){\n  same = true\n}else{\n  different = true;\n}\n\nif(input1.error === \"The resource you are requesting could not be found\" || input2.error === \"The resource you are requesting could not be found\"){\n  newFile = true;\n  different = false;\n}\n\nreturn [\n  {\n    \"fileName\": input1?.name ? input1?.name : input2?.name,\n    \"same\": same,\n    \"different\": different,\n    \"newFile\": newFile\n  }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 40],
+      "id": "ef7d8dd5-ca67-4966-ae2a-3dc6524a7f89",
+      "name": "Comapare"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.same }}",
+                    "rightValue": "=true",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "c5619270-37b4-4152-a438-0bf358c8285e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Same"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "af8652a5-2dba-4874-a8f5-b1af50f895d5",
+                    "leftValue": "={{ $json.different }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Different"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "af5e523a-4b0c-455b-98e6-c037043297f2",
+                    "leftValue": "={{ $json.newFile }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New File"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [1020, -340],
+      "id": "0bd2f59a-9fd0-4131-b482-3a3c5b4cd16e",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "let decoded;\n\nif($input.all()[0].json?.content){\n  decoded = Buffer.from($input.all()[0].json.content, 'base64').toString('utf-8');\n}else{\n  const formatedData = $input.all()[0].json\n  return [formatedData];\n}\n\nconst formatedData = JSON.parse(decoded);\n\nreturn [formatedData];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, -280],
+      "id": "bdf772f0-965b-4549-9e1a-f3db0983b92a",
+      "name": "Format github data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawObj = $input.all();\n\nconst jsonString = JSON.stringify(rawObj[0].json);\n\nconst base64 = Buffer.from(jsonString).toString(\"base64\");\n\nreturn [\n  {\n    json: {\n      encoded: base64\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 620],
+      "id": "9e9b67b7-0bc2-4c0d-99be-a360975da568",
+      "name": "Convert to base64"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawObj = $input.all();\n\nconst decodedStr = Buffer.from(rawObj[0].json.encoded, 'base64').toString('utf-8');\n\nconst parsed = JSON.parse(decodedStr);\n\nconst innerData = parsed;\nconst reEncoded = Buffer.from(JSON.stringify(innerData)).toString('base64');\n\nreturn [\n  {\n    json: {\n      fileContent: reEncoded\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1020, 300],
+      "id": "d5bbbcb3-c334-490a-8f9a-df25eef73cab",
+      "name": "re-encode"
+    },
+    {
+      "parameters": {},
+      "name": "Merge for Compare",
+      "type": "n8n-nodes-base.merge",
+      "position": [620, 180],
+      "typeVersion": 1,
+      "id": "606049ec-0ebd-418c-af3f-793ac00b88dc"
+    },
+    {
+      "parameters": {
+        "mode": "passThrough",
+        "output": "input2"
+      },
+      "name": "Merge for Create File",
+      "type": "n8n-nodes-base.merge",
+      "position": [1600, 320],
+      "typeVersion": 1,
+      "id": "459316fc-95ae-466c-8b3b-d710b7e86713"
+    },
+    {
+      "parameters": {
+        "mode": "passThrough",
+        "output": "input2"
+      },
+      "name": "Merge for Update File",
+      "type": "n8n-nodes-base.merge",
+      "position": [1460, 600],
+      "typeVersion": 1,
+      "id": "0a07563a-3b25-41ed-b1da-eb84923c277c"
+    }
+  ]
+}
