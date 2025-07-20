@@ -1,4 +1,6 @@
 # n8n Workflow Backup to GitHub
+<img width="2756" height="1354" alt="image" src="https://github.com/user-attachments/assets/d6dba0a5-e891-4e9f-a9dc-7c5473f425d9" />
+
 
 This workflow automatically backs up all your n8n workflows into a GitHub repository daily (or manually on trigger). It compares existing files with the current ones, creates new files for new workflows, and updates the existing ones if any changes are detected.
 
